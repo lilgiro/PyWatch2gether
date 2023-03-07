@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# video sample
+VideoSample/
+
+#Executable 
+output/
