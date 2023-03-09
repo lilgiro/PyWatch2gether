@@ -1,29 +1,7 @@
 #! /usr/bin/env python3
-#
-# PyQt5-based video-sync example for VLC Python bindings
-# Copyright (C) 2009-2010 the VideoLAN team
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
-#
-"""
-A VLC python bindings player implemented with PyQt5 that is meant to be utilized
-as the "master" player that controls all "slave players".
 
-Author: Saveliy Yusufov, Columbia University, sy2685@columbia.edu
-Date: 25 January 2019
-"""
+#Saveliy Yusufov
+#Check main.py header for more info
 
 import platform
 import queue
@@ -346,7 +324,6 @@ class MasterPlayer(QtWidgets.QMainWindow):
 
         if media_pos >= 0 and self.mediaplayer.is_playing():
             current_time = self.mediaplayer.get_time()
-            self.data_queue.put(current_time)
         else:
             self.data_queue.queue.clear()
 
@@ -374,17 +351,3 @@ class MasterPlayer(QtWidgets.QMainWindow):
 
     def open_socket(self):
         self.socket = Server(self.ip, self.port, self.data_queue)
-
-# def main():
-#     """Entry point for our simple vlc player
-#     """
-#     app = QtWidgets.QApplication(sys.argv)
-#     player = Player()
-
-#     player.show()
-#     player.resize(640, 480)
-#     sys.exit(app.exec_())
-
-
-# if __name__ == "__main__":
-#     main()
