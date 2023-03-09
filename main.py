@@ -1,4 +1,6 @@
 #! /usr/bin/env python3
+
+# Original header:
 #
 # PyQt5-based video-sync example for VLC Python bindings
 # Copyright (C) 2009-2010 the VideoLAN team
@@ -23,6 +25,15 @@ as the "master" player that controls all "slave players".
 
 Author: Saveliy Yusufov, Columbia University, sy2685@columbia.edu
 Date: 25 January 2019
+"""
+# End of original header
+
+"""
+The file starting with #Saveliy Yusufov are the files from the original project that I modified to fit my needs, excluding this one that I wrote from scratch.
+I have edited some of the code, but for now alot of the original code is still in use, thx Saveliy Yusufov <3.
+
+Author: lilgiro, lilgiro12@gmail.com
+Date: 09 March 2023
 """
 
 
