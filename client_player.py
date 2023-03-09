@@ -24,7 +24,7 @@ class SlavePlayer(QtWidgets.QMainWindow):
     """Stripped-down PyQt5-based media player class to sync with "master" video.
     """
 
-    def __init__(self, data_queue, master=None):
+    def __init__(self, master=None):
         QtWidgets.QMainWindow.__init__(self, master)
         self.setWindowTitle("Mini Player")
         self.statusbar = self.statusBar()
@@ -49,7 +49,8 @@ class SlavePlayer(QtWidgets.QMainWindow):
         self.timer.setInterval(10)
         self.timer.timeout.connect(self.update_ui)
 
-        self.data_queue = data_queue
+        self.data_queue = queue.Queue()
+        self.request_queue = queue.Queue()
         self.timer.start()
 
     def init_ui(self):
@@ -72,6 +73,16 @@ class SlavePlayer(QtWidgets.QMainWindow):
         self.vboxlayout = QtWidgets.QVBoxLayout()
         self.vboxlayout.addWidget(self.videoframe)
         self.widget.setLayout(self.vboxlayout)
+
+        # Add a pause and play button
+        self.playbutton = QtWidgets.QPushButton()
+        self.playbutton.setFixedWidth(40)
+        self.playbutton.setIcon(self.style().standardIcon(QtWidgets.QStyle.SP_MediaPlay))
+        self.playbutton.clicked.connect(self.play_pause)
+
+        #Show the button
+        self.vboxlayout.addWidget(self.playbutton)
+        
 
     def open_file(self):
         """Open a media file in a MediaPlayer
@@ -134,6 +145,12 @@ class SlavePlayer(QtWidgets.QMainWindow):
         val = int(val)
         if val != self.mediaplayer.get_time():
             self.mediaplayer.set_time(val)
+    
+    def play_pause(self):
+        if self.mediaplayer.is_playing():
+            self.request_queue.put('p')
+        else:
+            self.request_queue.put('P')
 
     def update_statusbar(self):
         mtime = QtCore.QTime(0, 0, 0, 0)
@@ -145,7 +162,7 @@ class SlavePlayer(QtWidgets.QMainWindow):
         self.port = port
     
     def open_socket(self):
-        self.socket = Client(self.ip, self.port, self.data_queue)
+        self.socket = Client(self.ip, self.port, self.data_queue, self.request_queue)
 
 
 # def main():

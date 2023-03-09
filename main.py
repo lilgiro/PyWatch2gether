@@ -109,8 +109,7 @@ class StartingWindow(QtWidgets.QMainWindow):
             self.player = MasterPlayer()
 
         elif self.mode == "client":
-            data_queue = queue.Queue()
-            self.player = SlavePlayer(data_queue)
+            self.player = SlavePlayer()
 
         else:
             print("Error: mode not selected. How did you get here?")

@@ -34,14 +34,22 @@ class MasterPlayer(QtWidgets.QMainWindow):
         self.ip = ""
         self.port = 0
 
+        self.is_listening_to_requests = True
+
         self.create_ui()
         self.data_queue = queue.Queue()
+        self.request_queue = queue.Queue()
         self.is_paused = False
 
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_ui)
         self.timer.timeout.connect(self.update_time_label)
+
+        self.timerClient = QtCore.QTimer(self)
+        self.timerClient.setInterval(1000)
+        self.timerClient.timeout.connect(self.listen_for_requests)
+        self.timerClient.start()
 
 
     def create_ui(self):
@@ -138,16 +146,25 @@ class MasterPlayer(QtWidgets.QMainWindow):
 
         menu_bar = self.menuBar()
 
-        # File menu
-        file_menu = menu_bar.addMenu("File")
+        # menu
+        file_menu = menu_bar.addMenu("Menu")
 
-        # Create actions to load a new media file and to close the app
+        # Create actions to load a new media file, close the app and listen to clients
         open_action = QtWidgets.QAction("Load Video", self)
         close_action = QtWidgets.QAction("Close App", self)
+        listen_check = QtWidgets.QAction("Listen to clients", self, checkable=True)
+        listen_check.setChecked(True)
         file_menu.addAction(open_action)
         file_menu.addAction(close_action)
+        file_menu.addAction(listen_check)
         open_action.triggered.connect(self.open_file)
         close_action.triggered.connect(sys.exit)
+        listen_check.triggered.connect(self.set_listen_status)
+
+    def set_listen_status(self, status):
+        """Update the listen status
+        """
+        self.is_listening_to_requests = status
 
     def play_pause(self):
         """Toggle play/pause status
@@ -313,6 +330,11 @@ class MasterPlayer(QtWidgets.QMainWindow):
         self.mediaplayer.set_position(pos * .001)
         self.timer.start()
 
+    def listen_for_requests(self):
+        #Listen to the client request (or not)
+        if not self.request_queue.empty() and self.is_listening_to_requests:
+            self.process_client_request()
+
     def update_ui(self):
         """Updates the user interface"""
 
@@ -344,10 +366,28 @@ class MasterPlayer(QtWidgets.QMainWindow):
 
     def update_pb_rate_label(self):
         self.pb_rate_label.setText("Playback rate: {}x".format(str(self.mediaplayer.get_rate())))
+
+    def process_client_request(self):
+        """Process the client request."""
+        request = self.request_queue.get()
+        if request == 'p':
+            if self.is_paused:
+                print("Ignoring client because unsynced")
+            else:
+                self.play_pause()
+                self.request_queue.queue.clear()
+        elif request == 'P':
+            if self.is_paused:
+                self.play_pause()
+                self.request_queue.queue.clear()
+            else:
+                print("Ignoring client because unsynced")
+        else:
+            self.data_queue.queue.clear()
     
     def set_ip_and_port(self, ip, port):
         self.ip = ip
         self.port = port
 
     def open_socket(self):
-        self.socket = Server(self.ip, self.port, self.data_queue)
+        self.socket = Server(self.ip, self.port, self.data_queue, self.request_queue)
