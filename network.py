@@ -63,7 +63,7 @@ class Server:
 
         # Bind the socket to the port
         logger.info("Server started on %s port %s", host, port)
-        self.sock.bind((host, port))
+        self.sock.bind((host, int(port)))
 
         # Listen for incoming connections
         self.sock.listen(5)
@@ -111,28 +111,12 @@ class Client:
     def __init__(self, address, port, data_queue):
         self.data_queue = data_queue
 
-        if platform.system() == "Windows":
+        # Create a TCP/IP socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-            # Create a TCP/IP socket
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-            # Connect the socket to the port where the server is listening
-            logger.info("Connecting to %s port %s", address, port)
-            self.sock.connect((address, port))
-        else:
-
-            # Create a UDS socket
-            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-
-            # Connect the socket to the port where the server is listening
-            server_address = "./uds_socket"
-            logger.info("New client connecting to %s", server_address)
-
-            try:
-                self.sock.connect(server_address)
-            except socket.error:
-                logger.exception()
-                sys.exit(1)
+        # Connect the socket to the port where the server is listening
+        logger.info("Connecting to %s port %s", address, port)
+        self.sock.connect((address, int(port)))
 
         thread = threading.Thread(target=self.data_receiver, args=())
         thread.daemon = True

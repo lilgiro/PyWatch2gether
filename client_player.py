@@ -34,7 +34,7 @@ import vlc
 from network import Client
 
 
-class MiniPlayer(QtWidgets.QMainWindow):
+class SlavePlayer(QtWidgets.QMainWindow):
     """Stripped-down PyQt5-based media player class to sync with "master" video.
     """
 
@@ -50,17 +50,8 @@ class MiniPlayer(QtWidgets.QMainWindow):
         self.media = None
 
         #Ask for ip and port
-        ip, ok = QtWidgets.QInputDialog.getText(self, 'Input Dialog', 'Enter ip:')
-        if ok and ip:
-            self.ip = ip
-        else:
-            self.ip = "localhost"
-
-        port, ok = QtWidgets.QInputDialog.getText(self, 'Input Dialog', 'Enter port:')
-        if ok and port.isdigit():
-            self.port = int(port)
-        else:
-            self.port = 4999
+        self.ip = ""
+        self.port = 0
 
         # Create an empty vlc media player
         self.mediaplayer = self.instance.media_player_new()
@@ -162,22 +153,29 @@ class MiniPlayer(QtWidgets.QMainWindow):
         mtime = QtCore.QTime(0, 0, 0, 0)
         time = mtime.addMSecs(self.mediaplayer.get_time())
         self.statusbar.showMessage(time.toString())
+    
+    def set_ip_and_port(self, ip, port):
+        self.ip = ip
+        self.port = port
+    
+    def open_socket(self):
+        self.socket = Client(self.ip, self.port, self.data_queue)
 
 
-def main():
-    """Entry point for our simple vlc player
-    """
-    app = QtWidgets.QApplication(sys.argv)
+# def main():
+#     """Entry point for our simple vlc player
+#     """
+#     app = QtWidgets.QApplication(sys.argv)
 
-    data_queue = queue.Queue()
+#     data_queue = queue.Queue()
 
-    player = MiniPlayer(data_queue)
-    player.show()
-    player.resize(480, 480)
+#     player = MiniPlayer(data_queue)
+#     player.show()
+#     player.resize(480, 480)
 
-    _ = Client(player.ip, player.port, data_queue)
-    sys.exit(app.exec_())
+#     _ = Client(player.ip, player.port, data_queue)
+#     sys.exit(app.exec_())
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
